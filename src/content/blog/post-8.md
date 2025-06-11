@@ -5,7 +5,7 @@ publishDate: 'October 11 2023'
 tags:
   - CSS
   - Web development
-isFeatured: true
+isFeatured: false
 seo:
   image:
     src: '/post-8.jpg'
