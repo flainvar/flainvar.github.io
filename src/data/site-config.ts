@@ -78,7 +78,7 @@ const siteConfig: SiteConfig = {
         title: 'Portafolio de ciberseguridad.',
         text: "¡Hola! Bienvenidos a mi portafolios, aquí podrás aprender junto a mí sobre análisis de seguridad defensiva. Tras mi etapa universitaria -estudiando sociología- decidí dedicarme a una de mis pasiones tempranas: la informática. Así, me matriculé en el Grado Superior de ASIR a la par que estudio, de manera autodidáctica, ciberseguridad con herramientas online como HackTheBox. Mi objetivo actual es la certificación de CDSA.",
         image: {
-            src: '/hero.jpeg',
+            src: '/curro.png',
             alt: 'A person sitting at a desk in front of a computer'
         },
         
