@@ -70,7 +70,7 @@ const siteConfig: SiteConfig = {
     socialLinks: [
         {
             text: 'Linkedin',
-            href: 'www.linkedin.com/in/francisco-j-márquez-astacio-563186267'
+            href: 'www.linkedin.com/in/flainvar'
         },
 
     ],
