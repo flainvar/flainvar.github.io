@@ -79,7 +79,7 @@ const siteConfig: SiteConfig = {
 
     ],
     hero: {
-        title: 'Hi There & Welcome to My Corner of the Web!',
+        title: 'Portafolio de ciberseguridad.',
         text: "Aquí podrás aprender junto a mí sobre análisis de seguridad defensiva.",
         image: {
             src: '/hero.jpeg',
