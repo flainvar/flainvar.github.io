@@ -63,10 +63,6 @@ const siteConfig: SiteConfig = {
     ],
     footerNavLinks: [
         {
-            text: 'About',
-            href: '/about'
-        },
-        {
             text: 'Download theme',
             href: 'https://github.com/JustGoodUI/dante-astro-theme'
         }
