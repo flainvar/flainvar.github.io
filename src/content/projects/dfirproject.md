@@ -1,62 +1,124 @@
 ---
-title: 'PixelPerfect Art Gallery'
-description: PixelPerfect Art Gallery is an innovative online platform that transcends traditional art exhibition spaces.
-publishDate: 'Oct 25 2023'
-isFeatured: false
-seo:
-  image:
-    src: '/project-5.jpg'
+title: Configuración de un Homelab DFIR
+description: Una guía paso a paso para configurar tu entorno de laboratorio de respuesta a incidentes y forense digital.
+author: Flainvar
+date: 2025-06-17
+tags: [DFIR, Homelab, Ciberseguridad, Splunk, Zeek, Windows Server, Ubuntu]
+image: ../assets/project_images/hero-image.jpg
 ---
 
-![Project preview](/project-5.jpg)
+## Construyendo Nuestro Homelab DFIR: Esquema de Red
 
-**Note:** This case study is entirely fictional and created for the purpose of showcasing [Dante Astro.js theme functionality](https://justgoodui.com/astro-themes/dante/).
+As we begin our journey building our own DFIR homelab we need to scheme our network in order to set up the environment.
 
-**Project Overview:**
-PixelPerfect Art Gallery is an innovative online platform that transcends traditional art exhibition spaces. This web application is dedicated to showcasing and celebrating pixel art in the form of Non-Fungible Tokens (NFTs), providing artists with a digital canvas to display their unique creations while ensuring secure ownership through blockchain technology.
+This project has an internal network composed of 3 virtual machines which are the followings:
 
-## Objectives
+First, a **windows servers** that acts as the **Domain Controller**. This virtual machine will behave, as well, as router itself so we will need two different network adapters.
 
-1. Create an immersive online gallery experience specifically tailored for pixel art enthusiasts and NFT collectors.
-2. Utilize blockchain technology to authenticate and secure ownership of digital artworks, ensuring a transparent and tamper-proof art marketplace.
-3. Foster a community of digital artists and art collectors, providing a platform for collaboration, appreciation, and exchange.
+The external adapter will be connected to our external network and the internal adapter will be connected to our internal network. We will need to set an static IP address for the internal network and configure protocols in order to make our project functional:
 
-## Features
+| Function          | Windows Server Role / Feature      | Primary Protocols/Services |
+| :---------------- | :--------------------------------- | :------------------------- |
+| Routing           | Remote Access (NAT, Routing)       | TCP/IP, NAT, RIP (optional) |
+| Domain Controller | Active Directory Domain Services   | Kerberos, LDAP/LDAPS, DNS  |
+| IP Assignment     | DHCP Server                        | DHCP                       |
+| Name Resolution   | DNS Server                         | DNS                        |
+| Time Sync         | (Built-in with AD DS)              | NTP                        |
 
-1. **NFT Art Exhibition:**
+Second, for the client, we will use a single **windows 10 VM**. And Third, an **ubuntu server** that will be used to host our DFIR tools: we are gonna use **Splunk** to ingest data from our windows security logs and **Zeek** to monitorize the network. We will need, as well, an attacker machine which OS will be **Parrot**. The diagram that follows summarize our plan:
 
-- PixelPerfect features a curated exhibition of pixel art NFTs, showcasing a diverse range of styles, themes, and techniques.
-- Users can explore and appreciate the intricate details of each digital artwork in a visually stunning online gallery.
+![Diagrama de la red del homelab DFIR](https://via.placeholder.com/800x450/007bff/ffffff?text=DIAGRAMA+DE+LA+RED)
 
-2. **Blockchain Authentication:**
+As our objective in this chapter is to set up this environment we set a very simple playbook that we may develop in the following chapters where we will put on practice the tools that we are installing in our ubuntu server. Remember that is a good practice to keep your PCs IPs tracked, note them!
 
-- Each pixel art piece is tokenized as an NFT on a blockchain, ensuring authenticity, provenance, and secure ownership.
-- Users can view the blockchain records to verify the origin and history of the digital artworks.
+---
 
-3. **Virtual Art Auctions:**
+### Installing and managing our Windows 2019 server.
 
-- PixelPerfect hosts virtual art auctions, allowing users to bid on and acquire exclusive pixel art NFTs.
-- The auction platform provides a dynamic and engaging environment for art enthusiasts and collectors.
+First of all, we are gonna set up ours LAN network adapter, we have chose the following IP for our server: **192.168.10.1\24**. We have also change the name to **SRV-AD** and then we have installed Active Directory Domain Services:
 
-4. **Community Collaboration Spaces:**
+![Configuración inicial del servidor Windows y AD DS](https://via.placeholder.com/800x450/007bff/ffffff?text=CONFIGURACION+SRV-AD)
 
-- Dedicated community spaces allow artists to connect, collaborate, and showcase their creative process.
-- Users can discuss techniques, share insights, and even collaborate on pixel art projects within the PixelPerfect community.
+once installed, we have promoted the server to DC and we have created a new forest: “**dfirproject.local**”. Our next step is to set up **DHCP**. After this, we configure the routing options and we can finally connect with our windows 10 client to our internal network:
 
-5. **Interactive Pixel Art Creation Workshop:**
+![Conexión del cliente Windows 10 a la red interna](https://via.placeholder.com/800x450/007bff/ffffff?text=CLIENTE+WINDOWS+10+CONECTADO)
 
-- PixelPerfect provides a virtual workshop where users can create their own pixel art and potentially tokenize their creations as NFTs.
-- Artists can share their works with the community or submit them for consideration in future exhibitions.
+All we needed to configure and install on windows is already done. Lets now dive into our ubuntu server where we have to, first of all, install splunk. After the installation we have to initialize splunk, located on /opt/splunk/bin and run:
 
-## Technology Stack
+./splunk start
 
-- Frontend: Angular for a dynamic and responsive user interface.
-- Backend: Node.js for handling server-side logic and API integration.
-- Database: Ethereum blockchain for storing NFT ownership and transaction details.
-- Smart Contracts: Solidity for developing blockchain smart contracts.
+After this, we configure some credentials and now we have access to our web server:
 
-## Outcome
+![Inicio de sesión en Splunk y panel de administrador](https://via.placeholder.com/800x450/007bff/ffffff?text=ACCESO+SPLUNK+1)
+![Panel de administrador de Splunk](https://via.placeholder.com/800x450/007bff/ffffff?text=ACCESO+SPLUNK+2)
 
-PixelPerfect Art Gallery has successfully created a digital haven for pixel art enthusiasts, providing a secure and engaging platform for artists and collectors alike. The integration of blockchain technology ensures transparency and authenticity in the world of digital art, fostering a vibrant community that appreciates the uniqueness and creativity of pixel art NFTs.
+and by introducing the credential mentioned before we can now access our administrator dashboard.
 
-**Note:** This case study is entirely fictional and created for the purpose of showcasing [Dante Astro.js theme functionality](https://justgoodui.com/astro-themes/dante/).
+![Dashboard de administrador de Splunk](https://via.placeholder.com/800x450/007bff/ffffff?text=DASHBOARD+SPLUNK)
+
+it is important to set up the correct time zone preferences, if we Skip this step we may have problem visualizing our logs. We can do this on the preferences section.
+
+and we are gonna install **splunk add-on for microsoft windows**. The Splunk Add-on for Microsoft Windows is essential for collecting and processing data from Windows environments within Splunk. It enables the gathering of various data points, including system performance metrics (CPU, disk, memory, I/O), log files, configuration data, user data, and more. For this, we are gonna clic on apps and search by it’s name:
+
+![Instalación de Splunk Add-on para Windows](https://via.placeholder.com/800x450/007bff/ffffff?text=INSTALACION+ADD-ON+SPLUNK)
+
+now we are gonna configure the data receiving by clicking on **settings > forwarding and receiving > configure receiving > new receiving port**. We are now allowing the port **9997** which is the default one.
+
+![Configuración del puerto de recepción de datos en Splunk](https://via.placeholder.com/800x450/007bff/ffffff?text=PUERTO+RECEPCION+SPLUNK)
+
+Our next step is to install the forwarder in our windows machines.
+
+---
+
+once installed, we will head to SplunkUniversalForwader/etc/system/local to create our input.conf archive (we can copy it from our default directory). Once we have created it, we are gonna run it as administrator and modified it for getting the logs that we want. So, we are adding at the end of the text the following:
+
+[WinEventLog://Security]
+disabled = false
+start_from = oldest
+current_only = false
+checkpointInterval = 5
+renderXml = true
+
+[WinEventLog://System]
+disabled = false
+
+[WinEventLog://Application]
+disabled = false
+
+Now we proceed to services on the windows hosts machines to changue “SplunkForwader” services loggin options.
+
+![Configuración del servicio SplunkForwarder en Windows](https://via.placeholder.com/800x450/007bff/ffffff?text=SERVICIO+SPLUNKFORWARDER)
+
+now, if we run a new search with splunk we will finally see the data from our windows machine:
+
+![Registros de Windows visualizados en Splunk](https://via.placeholder.com/800x450/007bff/ffffff?text=REGISTROS+EN+SPLUNK)
+
+so we are gonna just do the same on our windows server machine.
+
+---
+
+#### Extra:
+
+* I had to add rules on port 9997 from the windows machine to allow traffic.
+* I should have assigned manual IP to ubuntu server. I didnt during the elaboration process of this article but I fixed it as soon as I noticed.
+
+---
+
+### 1.2 Adding more inputs and tools to our homelab:
+
+#### 1.2.1 Installing sysmon:
+
+We are gonna also install **sysmon** on our windows machines. We can download it from [here](https://docs.microsoft.com/en-us/sysinternals/downloads/sysmon) and all we need is a config xml archive. We are using the SwiftOnSecurity xml archive and u can find it [here](https://github.com/SwiftOnSecurity/sysmon-config).
+
+Now, we go back to our input file on the forwarder and we add the following:
+
+[WinEventLog://Microsoft-Windows-Sysmon/Operational]
+disabled = false
+
+**Remember to restart the SplunkForwader process to make it functional!**
+
+---
+
+Thank you so much for reading this far. This is the beginning of a journey I hope to enjoy alongside anyone who has the same passion for learning about cybersecurity as I do. Thanks to Andi for bringing me here. This is just the beginning! Later this week, you'll have a new post where we'll get started: we'll explore how to detect attacks and common practices in Windows using Splunk.
+
+---
