@@ -50,7 +50,7 @@ All we needed to configure and install on windows is already done. Lets now dive
 After this, we configure some credentials and now we have access to our web server:
 
 ![Inicio de sesión en Splunk y panel de administrador](https://via.placeholder.com/800x450/007bff/ffffff?text=ACCESO+SPLUNK+1)
-![Panel de administrador de Splunk](https://via.placeholder.com/800x450/007bff/ffffff?text=ACCESO+SPLUNK+2)
+![Panel de administrador de Splunk]
 
 and by introducing the credential mentioned before we can now access our administrator dashboard.
 
