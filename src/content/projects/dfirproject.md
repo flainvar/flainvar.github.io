@@ -1,11 +1,13 @@
 ---
-title: Configuración de un Homelab DFIR
+title: 'Configuración de un Homelab DFIR'
 description: Una guía paso a paso para configurar tu entorno de laboratorio de respuesta a incidentes y forense digital.
-author: Flainvar
-date: 2025-06-17
-tags: [DFIR, Homelab, Ciberseguridad, Splunk, Zeek, Windows Server, Ubuntu]
-image: ../assets/project_images/hero-image.jpg
----
+publishDate: 'Jun 17 2025'
+isFeatured: true
+seo:
+  image:
+    src: '/project-5.jpg'
+
+
 
 ## Construyendo Nuestro Homelab DFIR: Esquema de Red
 
