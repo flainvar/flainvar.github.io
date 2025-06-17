@@ -5,7 +5,7 @@ publishDate: 'Jun 17 2025'
 isFeatured: true
 seo:
   image:
-    src: '/project-5.jpg'
+    src: '/curro.png'
 
 ---
 
