@@ -7,7 +7,7 @@ seo:
   image:
     src: '/project-5.jpg'
 
-
+---
 
 ## Construyendo Nuestro Homelab DFIR: Esquema de Red
 
