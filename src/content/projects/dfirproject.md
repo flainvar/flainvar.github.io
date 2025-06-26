@@ -8,7 +8,7 @@ seo:
     src: '/curro.png'
 
 ---
-![Cabecera] (/public/curro.png)
+![Cabecera](/public/curro.png)
 
 ## Construyendo Nuestro Homelab DFIR: Esquema de Red
 
