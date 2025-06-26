@@ -1,13 +1,14 @@
 ---
-title: 'Configuración de un Homelab DFIR'
-description: Una guía paso a paso para configurar tu entorno de laboratorio de respuesta a incidentes y forense digital.
-publishDate: 'Jun 17 2025'
+title: 'Setting up our own DFIR Homelab.'
+description: A step by step guide to set up your own DFIR lab. 
+publishDate: 'Jun 26 2025'
 isFeatured: true
 seo:
   image:
     src: '/curro.png'
 
 ---
+![Cabecera] '/curro.png'
 
 ## Construyendo Nuestro Homelab DFIR: Esquema de Red
 
