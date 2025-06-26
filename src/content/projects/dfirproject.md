@@ -8,7 +8,6 @@ seo:
     src: '/curro.png'
 
 ---
-![Cabecera](/curro.png)
 
 ## Construyendo Nuestro Homelab DFIR: Esquema de Red
 
@@ -30,7 +29,7 @@ The external adapter will be connected to our external network and the internal 
 
 Second, for the client, we will use a single **windows 10 VM**. And Third, an **ubuntu server** that will be used to host our DFIR tools: we are gonna use **Splunk** to ingest data from our windows security logs and **Zeek** to monitorize the network. We will need, as well, an attacker machine which OS will be **Parrot**. The diagram that follows summarize our plan:
 
-![Diagrama de la red del homelab DFIR](https://via.placeholder.com/800x450/007bff/ffffff?text=DIAGRAMA+DE+LA+RED)
+![Diagrama de la red del homelab DFIR](/dfir1.png)
 
 As our objective in this chapter is to set up this environment we set a very simple playbook that we may develop in the following chapters where we will put on practice the tools that we are installing in our ubuntu server. Remember that is a good practice to keep your PCs IPs tracked, note them!
 
@@ -40,11 +39,11 @@ As our objective in this chapter is to set up this environment we set a very sim
 
 First of all, we are gonna set up ours LAN network adapter, we have chose the following IP for our server: **192.168.10.1\24**. We have also change the name to **SRV-AD** and then we have installed Active Directory Domain Services:
 
-![Configuración inicial del servidor Windows y AD DS](https://via.placeholder.com/800x450/007bff/ffffff?text=CONFIGURACION+SRV-AD)
+![Configuración inicial del servidor Windows y AD DS](/dfir2.png)
 
 once installed, we have promoted the server to DC and we have created a new forest: “**dfirproject.local**”. Our next step is to set up **DHCP**. After this, we configure the routing options and we can finally connect with our windows 10 client to our internal network:
 
-![Conexión del cliente Windows 10 a la red interna](https://via.placeholder.com/800x450/007bff/ffffff?text=CLIENTE+WINDOWS+10+CONECTADO)
+![Conexión del cliente Windows 10 a la red interna](/dfir3.png)
 
 All we needed to configure and install on windows is already done. Lets now dive into our ubuntu server where we have to, first of all, install splunk. After the installation we have to initialize splunk, located on /opt/splunk/bin and run:
 
@@ -52,22 +51,23 @@ All we needed to configure and install on windows is already done. Lets now dive
 
 After this, we configure some credentials and now we have access to our web server:
 
-![Inicio de sesión en Splunk y panel de administrador](https://via.placeholder.com/800x450/007bff/ffffff?text=ACCESO+SPLUNK+1)
-![Panel de administrador de Splunk]
+![Inicio de sesión en Splunk y panel de administrador](/dfir6.png)
 
 and by introducing the credential mentioned before we can now access our administrator dashboard.
 
-![Dashboard de administrador de Splunk](https://via.placeholder.com/800x450/007bff/ffffff?text=DASHBOARD+SPLUNK)
+![Panel de administrador de Splunk](/dfir7.png)
 
 it is important to set up the correct time zone preferences, if we Skip this step we may have problem visualizing our logs. We can do this on the preferences section.
 
+![Dashboard de administrador de Splunk](/dfir8.png)
+
 and we are gonna install **splunk add-on for microsoft windows**. The Splunk Add-on for Microsoft Windows is essential for collecting and processing data from Windows environments within Splunk. It enables the gathering of various data points, including system performance metrics (CPU, disk, memory, I/O), log files, configuration data, user data, and more. For this, we are gonna clic on apps and search by it’s name:
 
-![Instalación de Splunk Add-on para Windows](https://via.placeholder.com/800x450/007bff/ffffff?text=INSTALACION+ADD-ON+SPLUNK)
+![Instalación de Splunk Add-on para Windows](/dfir9.png)
 
 now we are gonna configure the data receiving by clicking on **settings > forwarding and receiving > configure receiving > new receiving port**. We are now allowing the port **9997** which is the default one.
 
-![Configuración del puerto de recepción de datos en Splunk](https://via.placeholder.com/800x450/007bff/ffffff?text=PUERTO+RECEPCION+SPLUNK)
+![Configuración del puerto de recepción de datos en Splunk](/dfir10.png)
 
 Our next step is to install the forwarder in our windows machines.
 
@@ -90,11 +90,11 @@ disabled = false
 
 Now we proceed to services on the windows hosts machines to changue “SplunkForwader” services loggin options.
 
-![Configuración del servicio SplunkForwarder en Windows](https://via.placeholder.com/800x450/007bff/ffffff?text=SERVICIO+SPLUNKFORWARDER)
+![Configuración del servicio SplunkForwarder en Windows](/dfir11.png)
 
 now, if we run a new search with splunk we will finally see the data from our windows machine:
 
-![Registros de Windows visualizados en Splunk](https://via.placeholder.com/800x450/007bff/ffffff?text=REGISTROS+EN+SPLUNK)
+![Registros de Windows visualizados en Splunk](/dfir12.png)
 
 so we are gonna just do the same on our windows server machine.
 
