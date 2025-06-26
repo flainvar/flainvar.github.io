@@ -4,11 +4,11 @@ description: A step by step guide to set up your own DFIR lab.
 publishDate: 'Jun 26 2025'
 isFeatured: true
 tags:
-  -Network
-  -Splunk
-  -Active Directory
-  -Windows
-  -Ubuntu Server
+  - Network
+  - Splunk
+  - Active Directory
+  - Windows
+  - Ubuntu Server
 
 seo:
   image:
