@@ -36,7 +36,7 @@ Third, we will use an Ubuntu Server that will host our DFIR tools. We plan to us
 ![Diagrama de la red del homelab DFIR](/dfir1.png)
 
 As the objective of this chapter is to build and configure the environment, we’ve created a simple playbook that we will continue to develop in future chapters. There, we’ll begin applying the tools installed on our Ubuntu server. Remember, it’s good practice to keep track of your machines’ IP addresses—make sure to document them!
----
+
 
 ### Initial Setup.
 
