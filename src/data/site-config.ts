@@ -40,7 +40,7 @@ export type SiteConfig = {
 
 const siteConfig: SiteConfig = {
     website: 'https://example.com',
-    title: 'Portafolio de ciberseguridad.',
+    title: 'Francisco J. Márquez Astacio',
     subtitle: 'From zero to SOC hero.',
     description: 'Astro.js and Tailwind CSS theme for blog and portfolio by justgoodui.com',
     image: {
