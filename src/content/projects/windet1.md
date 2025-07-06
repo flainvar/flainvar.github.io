@@ -11,7 +11,6 @@ tags:
   - Ubuntu Server
 
 ---
-# Detección de ataques a Windows utilizando Splunk.
 
 De aquí en adelante, las entradas serán en español.  En tanto que estoy preparándome la CDSA de HackTheBox, el contenido se basará en el modulo con el mismo nombre (en inglés) de esta web: Detecting Windows Attacks with Splunk. En esta primera entrada estudiaremos como detectar reconocimientos, utilizando los nativos de windows y BloodHund/SharpHound y como detectar un Password Sprying.
 
@@ -49,7 +48,9 @@ Prueba y muestra información sobre las relaciones de confianza entre dominios e
 
 Para detectar estos métodos de reconocimientos con Splunk utilizaremos los registros de Sysmon. Estos eventos constan de un identificador, el identificador que nos interesa aquí es el 1: creación de proceso. Hemos recreado un whoami /all y podemos detectarlo con la siguiente búsqueda: 
 
+``` SPL
 index="dfirad" source="XmlWinEventLog:Microsoft-Windows-Sysmon/Operational" EventID=1 
+```
 
 Esta primera parte es autoexplicativa, seleccionamos el index, la fuente y el ID de evento que nos interesa.
 
