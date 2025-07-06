@@ -50,7 +50,12 @@ Para detectar estos métodos de reconocimientos con Splunk utilizaremos los regi
 
 ``` SPL
 index="dfirad" source="XmlWinEventLog:Microsoft-Windows-Sysmon/Operational" EventID=1 
+| search OriginalFileName IN (arp.exe,chcp.com,ipconfig.exe,net.exe,net1.exe,nltest.exe,ping.exe,systeminfo.exe,whoami.exe) OR (OriginalFileName IN (cmd.exe,powershell.exe) AND Image IN (*arp*,*chcp*,*ipconfig*,*net*,*net1*,*nltest*,*ping*,*systeminfo*,*whoami*))
+| stats values(OriginalFileName) as process by ParentImage, ParentProcessId, User
+| where mvcount(process) >= 3
 ```
+
+index="dfirad" source="XmlWinEventLog:Microsoft-Windows-Sysmon/Operational" EventID=1 
 
 Esta primera parte es autoexplicativa, seleccionamos el index, la fuente y el ID de evento que nos interesa.
 
@@ -72,31 +77,18 @@ Bloodhound es una herramienta de enumeración que permite el reconocimiento y la
 
 Es difícil de detectar con los eventos de Windows, por ello, microsoft lanzó una lista de consultas LDAP habitualmentes utilizadas en el reconocimiento con bloodhound, que es lo que utilizaremos para detectarlo: 
 
-Recon tool
-Filter
-enum_ad_user_comments (Metasploit)
-(&(&(objectCategory=person)(objectClass=user))(|(description=*pass*)(comment=*pass*)))
-enum_ad_computers (Metasploit)
-(&(objectCategory=computer)(operatingSystem=*server*))
-enum_ad_groups (Metasploit)
-(&(objectClass=group))
-enum_ad_managedby_groups
-(Metasploit)
-(&(objectClass=group)(managedBy=*)),
-(&(objectClass=group)(managedBy=*)(groupType:1.2.840.113556.1.4.803:=2147483648))
-Get-NetComputer (PowerView)
-(&(sAMAccountType=805306369)(dnshostname=*))
-Get-NetUser - Users (Powerview)
-(&(samAccountType=805306368)(samAccountName=*)
-Get-NetUser - SPNs (Powerview)
-(&(samAccountType=805306368)(servicePrincipalName=*)
-Get-DFSshareV2 (Powerview)
-(&(objectClass=msDFS-Linkv2))
-Get-NetOU
-(PowerView)
-(&(objectCategory =organizationalUnit)(name=*))
-Get-DomainSearcher (Empire)
-(samAccountType=805306368)
+| Recon Tool                        | Filter                                                                 |
+|-----------------------------------|-----------------------------------------------------------------------|
+| enum_ad_user_comments (Metasploit) | (&(&(objectCategory=person)(objectClass=user))(\|(description=*pass*)(comment=*pass*))) |
+| enum_ad_computers (Metasploit)     | (&(objectCategory=computer)(operatingSystem=*server*))                |
+| enum_ad_groups (Metasploit)        | (&(objectClass=group))                                               |
+| enum_ad_managedby_groups (Metasploit) | (&(objectClass=group)(managedBy=*)),<br>(&(objectClass=group)(managedBy=*)(groupType:1.2.840.113556.1.4.803:=2147483648)) |
+| Get-NetComputer (PowerView)        | (&(sAMAccountType=805306369)(dnshostname=*))                         |
+| Get-NetUser - Users (Powerview)    | (&(samAccountType=805306368)(samAccountName=*)                        |
+| Get-NetUser - SPNs (Powerview)     | (&(samAccountType=805306368)(servicePrincipalName=*)                  |
+| Get-DFSshareV2 (Powerview)         | (&(objectClass=msDFS-Linkv2))                                        |
+| Get-NetOU (PowerView)              | (&(objectCategory=organizationalUnit)(name=*))                        |
+| Get-DomainSearcher (Empire)        | (samAccountType=805306368)                                           |
 
 Para ello, necesitaremos una nueva herramienta en nuestro cliente: SilkETW. Para ello vamos a generar una carpeta de logs y vincularla con el SplunkForwader, tal como hicimos en la entrada anterior con otras herramientas. 
 
@@ -104,11 +96,13 @@ Hemos decidido que, para esta muestra, no es necesario instalar el servicio de S
 
 Una vez generado, realizamos la siguiente búsqueda:
 
+``` SPL
 index="dfirad" source:"C:\\logs\\SilkETW\\ldap_events.json"
 | spath input=Message
 | rename XmlEventData.* as *
 | search SearchFilter="*(samAccountType=805306368)*"
 | stats values(SearchFilter) by ProcessID, ProcessName, DistinguishedName
+```
 
 ¡Bingo! Ahí tenemos nuestra entrada localizando el proceso. Vamos a desentrañar esta busqueda:
 
@@ -136,9 +130,11 @@ El método más habitual es el Event ID 4625 - Failed logon, de los logs de segu
 4771 - Kerberos Pre-Authentication Failed
 Utilizaremos la siguiente búsqueda: 
 
+``` SPL
 index="dfirad" source="WinEventLog:Security" EventCode="4625"
 | bin span=15m _time
 | stats values(Nombre_de_cuenta) as Users by source, "Dirección de red de origen", dest, EventCode, Motivo_del_error
+```
 
 Vamos a explicar por qué:
 el comando bin se usa para crear bloques de tiempo que son la clave aquí, dado el funcionamiento del password spray. Recordemos que este método prueba una misma contraseña para un grupo diferente de usuarios evitando el bloqueo. Así, un gran número de intentos en un periodo de tiempo determinado con diferentes usuarios es indicativo del password sprying.
@@ -152,37 +148,49 @@ Hemos recreado el ataque configurando responder.py para que escuchara la red y c
 
 Para cumplir con este objetivo utilizaremos el evento de sysmon con ID 22. Que podemos utilizar para encontrar archivos compartidos que no existen o están mal nombrados. 
 
+``` SPL
 index="dfirad" source:"XmlWinEventLog:Microsoft-Windows-Sysmon/Operational" EventCode="22"
 | table _time, Computer, user, Image, QueryName, QueryResults
+```
 
 Y Aquí lo tenemos, podemos observar como se ha conectado a nuestra máquina atacante, cuya IP acaba en 103.
 
 ## Useful splunk queries:
 
+Recapitulamos con una recopilación de las busquedas concretas que hemos utilizado. Si estás atascado con las tareas del curso puede que te sirvan de ayuda. Pero, cuidado,puede que tus campos no tengan los mismos nombres que los míos:
+
 ### Detecting recons:
 
 #### Windows' native:
 
+``` SPL
 index="dfirad" source="XmlWinEventLog:Microsoft-Windows-Sysmon/Operational" EventID=1 
 | search OriginalFileName IN (arp.exe,chcp.com,ipconfig.exe,net.exe,net1.exe,nltest.exe,ping.exe,systeminfo.exe,whoami.exe) OR (OriginalFileName IN (cmd.exe,powershell.exe) AND Image IN (*arp*,*chcp*,*ipconfig*,*net*,*net1*,*nltest*,*ping*,*systeminfo*,*whoami*))
 | stats values(OriginalFileName) as process by ParentImage, ParentProcessId, User
 | where mvcount(process) >= 3
+```
 
 #### Bloodhund/Sharphund
 
+``` SPL
 index="dfirad" source:"C:\\logs\\SilkETW\\ldap_events.json"
 | spath input=Message
 | rename XmlEventData.* as *
 | search SearchFilter="*(samAccountType=805306368)*"
 | stats values(SearchFilter) by ProcessID, ProcessName, DistinguishedName
+```
 
 ### Detecting Password Spraying:
 
+``` SPL
 index="dfirad" source="WinEventLog:Security" EventCode="4625"
 | bin span=15m _time
 | stats values(Nombre_de_cuenta) as Users by source, "Dirección de red de origen", dest, EventCode, Motivo_del_error
+```
 
 ### Detecting responder-like attack:
 
+``` SPL
 index="dfirad" source:"XmlWinEventLog:Microsoft-Windows-Sysmon/Operational" EventCode="22"
 | table _time, Computer, user, Image, QueryName, QueryResults
+```
