@@ -12,7 +12,7 @@ tags:
 
 ---
 
-## Building our network
+## 1. Building our network
 
 As we begin our journey in building our own DFIR homelab, we need to design the network in order to properly set up the environment.
 
@@ -38,7 +38,7 @@ Third, we will use an Ubuntu Server that will host our DFIR tools. We plan to us
 As the objective of this chapter is to build and configure the environment, we’ve created a simple playbook that we will continue to develop in future chapters. There, we’ll begin applying the tools installed on our Ubuntu server. Remember, it’s good practice to keep track of your machines’ IP addresses—make sure to document them!
 
 
-### Initial Setup.
+### 1.1 Initial Setup.
 
 First, we will configure our LAN network adapter. We’ve chosen the following IP address for our server: 192.168.10.1/24. We also renamed the server to SRV-AD, and installed Active Directory Domain Services.
 
