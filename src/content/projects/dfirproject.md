@@ -12,7 +12,7 @@ tags:
 
 ---
 
-## Construyendo Nuestro Homelab DFIR: Esquema de Red
+## Building our network
 
 As we begin our journey in building our own DFIR homelab, we need to design the network in order to properly set up the environment.
 
