@@ -1,6 +1,6 @@
 ---
 title: 'Detección de ataques a Windows utilizando Splunk.'
-description: Detección de reconocimientos y passwords sprayings.
+description: Detección de reconocimientos y passwords sprayings y LLMNR/NBT-NS Poisoning.
 publishDate: 'Jun 26 2025'
 isFeatured: true
 tags:
@@ -12,7 +12,9 @@ tags:
 
 ---
 
-De aquí en adelante, las entradas serán en español.  En tanto que estoy preparándome la CDSA de HackTheBox, el contenido se basará en el modulo con el mismo nombre (en inglés) de esta web: Detecting Windows Attacks with Splunk. En esta primera entrada estudiaremos como detectar reconocimientos, utilizando los nativos de windows y BloodHund/SharpHound y como detectar un Password Sprying.
+De aquí en adelante, las entradas serán en español.  En tanto que estoy preparándome la CDSA de HackTheBox, el contenido se basará en el modulo con el mismo nombre (en inglés) de esta web: Detecting Windows Attacks with Splunk. En esta primera entrada estudiaremos como detectar reconocimientos, utilizando los nativos de windows y BloodHound/SharpHound, como detectar un Password Sprying y, por último,  LLMNR/NBT-NS Poisoning.
+
+Además, situaremos estas tácticas en el marco de MITRE ATT%CK (Adversarial Tactics, Techniques, and Common Knowledge). El framework se vuelve crucial en cuanto se trata del diseño de defensas y detecciones.
 
 ## Detectando reconocimiento de usuarios y dominios comunes.
 
@@ -71,6 +73,20 @@ Aquí seleccionamos información adicional para que se nos muestre.
 
 Y, por último, estableces un filtro de "comportamiento" para evitar falsos positivos y centrar más nuestra búsqueda. 
 
+Para finalizar, referenciamos lás técnincas aquí empleadas en el marco de MITRE y sus propuestas de mitigación:
+
+T1087.002 – Account Discovery: Domain Account
+
+> Prevent administrator accounts from being enumerated when an application is elevating through UAC (Contro de Cuentas de Usuario) since it can lead to the disclosure of account names. The Registry key is located at HKLM\ SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\CredUI\EnumerateAdministrators. It can be disabled through GPO: Computer Configuration > [Policies] > Administrative Templates > Windows Components > Credential User Interface: Enumerate administrator accounts on elevation.
+
+T1018 – Remote System Discovery, T1069.002 – Permission Groups Discovery: Domain Groups and T1518.001 – Software Discovery: Security Software Discovery
+
+>This type of attack technique cannot be easily mitigated with preventive controls since it is based on the abuse of system features. 
+
+Esto quiere decir que tendremos que hacer hincapié en la detección de la ejecución de comandos, el acceso a ficheros y la creación de conexiones de red y los procesos, como hemos elaborado previamente. 
+
+
+
 ### Reconocimiento utilizando BloodHound/SharpHound.
 
 Bloodhound es una herramienta de enumeración que permite el reconocimiento y la visualización de un dominio de active directory. El software funciona ejecutando consultas LDAP hacia el DC (Domain Controller). LDAP (Lightweight Directory Access Protocol) es un protocolo de aplicación estándar que se utiliza para acceder a servicios de directorio, que son bases de datos centralizadas que almacenan información sobre usuarios, grupos y otros recursos, es decir, es algo así como las páginas amarillas del active directory.
@@ -116,6 +132,16 @@ La mayoría de las consultas LDAP legítimas suelen ser específicas. Por el con
 -Multiples consultas desde un PID único en un breve lapso de tiempo.
 -Uso de comodines en el campo "SearchFilter".
 
+Veamos que subténicas podríamos destacar en esta sección. Además de las que hemos mencionado previamente: T1069.002 – Permission Groups Discovery: Domain Groups y T1087.002 – Account Discovery: Domain Account, podemos destacar: 
+
+T1482 – Domain Trust Discovery
+
+>M1047 - Audit: Map the trusts within existing domains/forests and keep trust relationships to a minimum.
+>M1030 - Network Segmentation: Employ network segmentation for sensitive domains.
+
+Cómo podemos ver, un buen bastionado y una correcta segmentación de red es vital para la seguridad defensiva y son dos carácteristicas necesarias para la postura de seguridad de cualquier empresa.
+
+
 ## Detectando Password Sprying.
 
 El password sprying es un método que distribuye ataques a través de múltiples cuentas usando un conjunto limitado de contraseñas. Este método trata de evadir los bloqueos de cuentas que se suelen establecer en las políticas. Vamos a recrearlo:
@@ -139,6 +165,14 @@ index="dfirad" source="WinEventLog:Security" EventCode="4625"
 Vamos a explicar por qué:
 el comando bin se usa para crear bloques de tiempo que son la clave aquí, dado el funcionamiento del password spray. Recordemos que este método prueba una misma contraseña para un grupo diferente de usuarios evitando el bloqueo. Así, un gran número de intentos en un periodo de tiempo determinado con diferentes usuarios es indicativo del password sprying.
 
+Está subtécnica está referenciada en el marco Mitre como: T1110.003 – Brute Force: Password Spraying y sus mitigaciones recomendadas son:
+
+>M1036 - 	Account Use Policies: Set account lockout policies after a certain number of failed login attempts to prevent passwords from being guessed. Too strict a policy may create a denial of service condition and render environments un-usable, with all accounts used in the brute force being locked-out. Use conditional access policies to block logins from non-compliant devices or from outside defined organization IP ranges. Consider blocking risky authentication requests, such as those originating from anonymizing services/proxies.
+
+>M1032 - Multi-factor Authentication: Use multi-factor authentication. Where possible, also enable multi-factor authentication on externally facing services.
+
+>M1027 - Password Policies: Refer to NIST guidelines when creating password policies.
+
 ## Detectando Responder-like attacks
 
 El LLMNR y NBT-NS poisoning, también conocidos por NBNS spoofing atacan ineficiencias del protocolo de resolución de nombres. Estos protocolos se utilizan para resolver hostnames a IPs cuando falla el FQDN. Funciona como se muestra a continuación: 
@@ -154,6 +188,16 @@ index="dfirad" source:"XmlWinEventLog:Microsoft-Windows-Sysmon/Operational" Even
 ```
 
 Y Aquí lo tenemos, podemos observar como se ha conectado a nuestra máquina atacante, cuya IP acaba en 103.
+
+Esta subtenica está referenciada como: T1557.001 veamos sus mitigaciones: 
+
+>M1042 - Disable or Remove Feature or Program: disable LLMNR and NetBIOS in local computer security settings or by group policy if they are not needed within an environment. 
+
+>M1037 - Filter Network Traffic: use host-based security software to block LLMNR/NetBIOS traffic. Enabling SMB Signing can stop NTLMv2 relay attacks.
+
+>M1031 - Network Intrusion Prevention: network intrusion detection and prevention systems that can identify traffic patterns indicative of AiTM activity can be used to mitigate activity at the network level.
+
+>M1030 - Network Segmentation: network segmentation can be used to isolate infrastructure components that do not require broad network access. This may mitigate, or at least alleviate, the scope of AiTM activity.
 
 ## Useful splunk queries:
 

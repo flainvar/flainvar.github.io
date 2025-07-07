@@ -37,6 +37,8 @@ Third, we will use an Ubuntu Server that will host our DFIR tools. We plan to us
 
 As the objective of this chapter is to build and configure the environment, we’ve created a simple playbook that we will continue to develop in future chapters. There, we’ll begin applying the tools installed on our Ubuntu server. Remember, it’s good practice to keep track of your machines’ IP addresses—make sure to document them!
 
+Before we start we must ask ourselves why and what SIEM are we choosing. A SIEM or Security Information and Event Management is a security tool that aggregate and analyzes logs and events data from different sources within an IT to detect and respond security incidents. In our case we are using Splunk for utilitarian reasons: It is used during the CDSA exam. From a technical perspective Splunk is also a solid option for various reasons: SPL is a powerful and flexible query lenguage. Splunk is able to integrate with a huge range of third party tools and it also allows SOAR integration. The only thing that could be remarked as negatives is its price, and, maybe, its complexity.
+
 
 ### 1.1 Initial Setup.
 
