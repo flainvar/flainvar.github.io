@@ -77,11 +77,11 @@ Para finalizar, referenciamos lás técnincas aquí empleadas en el marco de MIT
 
 T1087.002 – Account Discovery: Domain Account
 
->> Prevent administrator accounts from being enumerated when an application is elevating through UAC (Contro de Cuentas de Usuario) since it can lead to the disclosure of account names. The Registry key is located at HKLM\ SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\CredUI\EnumerateAdministrators. It can be disabled through GPO: Computer Configuration > [Policies] > Administrative Templates > Windows Components > Credential User Interface: Enumerate administrator accounts on elevation.
+> Prevent administrator accounts from being enumerated when an application is elevating through UAC (Contro de Cuentas de Usuario) since it can lead to the disclosure of account names. The Registry key is located at HKLM\ SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\CredUI\EnumerateAdministrators. It can be disabled through GPO: Computer Configuration > [Policies] > Administrative Templates > Windows Components > Credential User Interface: Enumerate administrator accounts on elevation.
 
 T1018 – Remote System Discovery, T1069.002 – Permission Groups Discovery: Domain Groups and T1518.001 – Software Discovery: Security Software Discovery
 
->>This type of attack technique cannot be easily mitigated with preventive controls since it is based on the abuse of system features. 
+>This type of attack technique cannot be easily mitigated with preventive controls since it is based on the abuse of system features. 
 
 Esto quiere decir que tendremos que hacer hincapié en la detección de la ejecución de comandos, el acceso a ficheros y la creación de conexiones de red y los procesos, como hemos elaborado previamente. 
 
@@ -136,8 +136,8 @@ Veamos que subténicas podríamos destacar en esta sección. Además de las que 
 
 T1482 – Domain Trust Discovery
 
->>M1047 - Audit: Map the trusts within existing domains/forests and keep trust relationships to a minimum.
->>M1030 - Network Segmentation: Employ network segmentation for sensitive domains.
+>M1047 - Audit: Map the trusts within existing domains/forests and keep trust relationships to a minimum.
+>M1030 - Network Segmentation: Employ network segmentation for sensitive domains.
 
 Cómo podemos ver, un buen bastionado y una correcta segmentación de red es vital para la seguridad defensiva y son dos carácteristicas necesarias para la postura de seguridad de cualquier empresa.
 
@@ -167,11 +167,11 @@ el comando bin se usa para crear bloques de tiempo que son la clave aquí, dado 
 
 Está subtécnica está referenciada en el marco Mitre como: T1110.003 – Brute Force: Password Spraying y sus mitigaciones recomendadas son:
 
->>M1036 - 	Account Use Policies: Set account lockout policies after a certain number of failed login attempts to prevent passwords from being guessed. Too strict a policy may create a denial of service condition and render environments un-usable, with all accounts used in the brute force being locked-out. Use conditional access policies to block logins from non-compliant devices or from outside defined organization IP ranges. Consider blocking risky authentication requests, such as those originating from anonymizing services/proxies.
+>M1036 - 	Account Use Policies: Set account lockout policies after a certain number of failed login attempts to prevent passwords from being guessed. Too strict a policy may create a denial of service condition and render environments un-usable, with all accounts used in the brute force being locked-out. Use conditional access policies to block logins from non-compliant devices or from outside defined organization IP ranges. Consider blocking risky authentication requests, such as those originating from anonymizing services/proxies.
 
->>M1032 - Multi-factor Authentication: Use multi-factor authentication. Where possible, also enable multi-factor authentication on externally facing services.
+>M1032 - Multi-factor Authentication: Use multi-factor authentication. Where possible, also enable multi-factor authentication on externally facing services.
 
->>M1027 - Password Policies: Refer to NIST guidelines when creating password policies.
+>M1027 - Password Policies: Refer to NIST guidelines when creating password policies.
 
 ## Detectando Responder-like attacks
 
@@ -191,13 +191,13 @@ Y Aquí lo tenemos, podemos observar como se ha conectado a nuestra máquina ata
 
 Esta subtenica está referenciada como: T1557.001 veamos sus mitigaciones: 
 
->>M1042 - Disable or Remove Feature or Program: disable LLMNR and NetBIOS in local computer security settings or by group policy if they are not needed within an environment. 
+>M1042 - Disable or Remove Feature or Program: disable LLMNR and NetBIOS in local computer security settings or by group policy if they are not needed within an environment. 
 
->>M1037 - Filter Network Traffic: use host-based security software to block LLMNR/NetBIOS traffic. Enabling SMB Signing can stop NTLMv2 relay attacks.
+>M1037 - Filter Network Traffic: use host-based security software to block LLMNR/NetBIOS traffic. Enabling SMB Signing can stop NTLMv2 relay attacks.
 
->>M1031 - Network Intrusion Prevention: network intrusion detection and prevention systems that can identify traffic patterns indicative of AiTM activity can be used to mitigate activity at the network level.
+>M1031 - Network Intrusion Prevention: network intrusion detection and prevention systems that can identify traffic patterns indicative of AiTM activity can be used to mitigate activity at the network level.
 
->>M1030 - Network Segmentation: network segmentation can be used to isolate infrastructure components that do not require broad network access. This may mitigate, or at least alleviate, the scope of AiTM activity.
+>M1030 - Network Segmentation: network segmentation can be used to isolate infrastructure components that do not require broad network access. This may mitigate, or at least alleviate, the scope of AiTM activity.
 
 ## Useful splunk queries:
 
