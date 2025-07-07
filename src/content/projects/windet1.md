@@ -50,6 +50,8 @@ Prueba y muestra información sobre las relaciones de confianza entre dominios e
 
 Para detectar estos métodos de reconocimientos con Splunk utilizaremos los registros de Sysmon. Estos eventos constan de un identificador, el identificador que nos interesa aquí es el 1: creación de proceso. Hemos recreado un whoami /all y podemos detectarlo con la siguiente búsqueda: 
 
+![windet11](/windet11.png)
+
 ``` SPL
 index="dfirad" source="XmlWinEventLog:Microsoft-Windows-Sysmon/Operational" EventID=1 
 | search OriginalFileName IN (arp.exe,chcp.com,ipconfig.exe,net.exe,net1.exe,nltest.exe,ping.exe,systeminfo.exe,whoami.exe) OR (OriginalFileName IN (cmd.exe,powershell.exe) AND Image IN (*arp*,*chcp*,*ipconfig*,*net*,*net1*,*nltest*,*ping*,*systeminfo*,*whoami*))
@@ -110,6 +112,8 @@ Para ello, necesitaremos una nueva herramienta en nuestro cliente: SilkETW. Para
 
 Hemos decidido que, para esta muestra, no es necesario instalar el servicio de Silk. Para ello simplemente lanzaremos el ejecutable a la par que recreamos el ataque con Sharphound y, finalmente, ingestaremos los logs:
 
+![windet12](/windet12.png)
+
 Una vez generado, realizamos la siguiente búsqueda:
 
 ``` SPL
@@ -119,6 +123,7 @@ index="dfirad" source:"C:\\logs\\SilkETW\\ldap_events.json"
 | search SearchFilter="*(samAccountType=805306368)*"
 | stats values(SearchFilter) by ProcessID, ProcessName, DistinguishedName
 ```
+![windet13](/windet13.png)
 
 ¡Bingo! Ahí tenemos nuestra entrada localizando el proceso. Vamos a desentrañar esta busqueda:
 
@@ -131,6 +136,8 @@ La mayoría de las consultas LDAP legítimas suelen ser específicas. Por el con
 -Gran número de filtros en una consulta única.
 -Multiples consultas desde un PID único en un breve lapso de tiempo.
 -Uso de comodines en el campo "SearchFilter".
+
+![windet14](/windet14.png)
 
 Veamos que subténicas podríamos destacar en esta sección. Además de las que hemos mencionado previamente: T1069.002 – Permission Groups Discovery: Domain Groups y T1087.002 – Account Discovery: Domain Account, podemos destacar: 
 
@@ -145,6 +152,8 @@ Cómo podemos ver, un buen bastionado y una correcta segmentación de red es vit
 ## Detectando Password Sprying.
 
 El password sprying es un método que distribuye ataques a través de múltiples cuentas usando un conjunto limitado de contraseñas. Este método trata de evadir los bloqueos de cuentas que se suelen establecer en las políticas. Vamos a recrearlo:
+
+![windet15](/windet15.png)
 
 ¿Cómo podemos detectar el password sprying?
 El método más habitual es el Event ID 4625 - Failed logon, de los logs de seguridad de windows. También podemos detectarlo a través de otros eventos cómo:
@@ -165,6 +174,8 @@ index="dfirad" source="WinEventLog:Security" EventCode="4625"
 Vamos a explicar por qué:
 el comando bin se usa para crear bloques de tiempo que son la clave aquí, dado el funcionamiento del password spray. Recordemos que este método prueba una misma contraseña para un grupo diferente de usuarios evitando el bloqueo. Así, un gran número de intentos en un periodo de tiempo determinado con diferentes usuarios es indicativo del password sprying.
 
+![windet16](/windet16.png)
+
 Está subtécnica está referenciada en el marco Mitre como: T1110.003 – Brute Force: Password Spraying y sus mitigaciones recomendadas son:
 
 >M1036 - 	Account Use Policies: Set account lockout policies after a certain number of failed login attempts to prevent passwords from being guessed. Too strict a policy may create a denial of service condition and render environments un-usable, with all accounts used in the brute force being locked-out. Use conditional access policies to block logins from non-compliant devices or from outside defined organization IP ranges. Consider blocking risky authentication requests, such as those originating from anonymizing services/proxies.
@@ -175,10 +186,14 @@ Está subtécnica está referenciada en el marco Mitre como: T1110.003 – Brute
 
 ## Detectando Responder-like attacks
 
-El LLMNR y NBT-NS poisoning, también conocidos por NBNS spoofing atacan ineficiencias del protocolo de resolución de nombres. Estos protocolos se utilizan para resolver hostnames a IPs cuando falla el FQDN. Funciona como se muestra a continuación: 
+El LLMNR y NBT-NS poisoning, también conocidos por NBNS spoofing atacan ineficiencias del protocolo de resolución de nombres. Estos protocolos se utilizan para resolver hostnames a IPs cuando falla el FQDN. Funciona como se muestra a continuación (fuente: Hack the box): 
+
+![windet17](/windet17.png)
 
 El objetivo de este ataque es conseguir el NetNTML Hash con la intención de, o bien descifrarlo, o bien retransmitirlo para obtener acceso a sistemas. 
 Hemos recreado el ataque configurando responder.py para que escuchara la red y conseguido el hash de la cuenta administrador. Vamos a ver como queda registrado en los logs. 
+
+![windet18](/windet18.png)
 
 Para cumplir con este objetivo utilizaremos el evento de sysmon con ID 22. Que podemos utilizar para encontrar archivos compartidos que no existen o están mal nombrados. 
 
@@ -186,6 +201,8 @@ Para cumplir con este objetivo utilizaremos el evento de sysmon con ID 22. Que p
 index="dfirad" source:"XmlWinEventLog:Microsoft-Windows-Sysmon/Operational" EventCode="22"
 | table _time, Computer, user, Image, QueryName, QueryResults
 ```
+
+![windet19](/windet19.png)
 
 Y Aquí lo tenemos, podemos observar como se ha conectado a nuestra máquina atacante, cuya IP acaba en 103.
 
